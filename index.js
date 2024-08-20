@@ -1,8 +1,11 @@
 'use strict';
 
 // ENTER YOUR API KEY HERE
+
+let HEYGEN_API_KEY = process.env.HEYGEN_API_KEY;
+
 const heygen_API = {
-  apiKey:"YjFmNWRkZDg0OTJkNDkzYzg2YWUyYTQyMmNlMmRlNWUtMTcxODQ2NTk1Mg==",
+  apiKey:HEYGEN_API_KEY,
   serverUrl: 'https://api.heygen.com',
 };
 console.log(`HEYGEN_API_KEY  ${JSON.stringify(heygen_API)}`);
