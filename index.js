@@ -2,13 +2,6 @@
 
 // ENTER YOUR API KEY HERE
 
-let HEYGEN_API_KEY = process.env.HEYGEN_API_KEY;
-
-const heygen_API = {
-  apiKey:HEYGEN_API_KEY,
-  serverUrl: 'https://api.heygen.com',
-};
-console.log(`HEYGEN_API_KEY  ${JSON.stringify(heygen_API)}`);
 
 const apiKey = heygen_API.apiKey;
 const SERVER_URL = heygen_API.serverUrl;
@@ -88,7 +81,7 @@ async function startAndDisplaySession() {
   const localDescription = await peerConnection.createAnswer();
   await peerConnection.setLocalDescription(localDescription);
 
- // When ICE candidate is available, send to the server
+  // When ICE candidate is available, send to the server
   peerConnection.onicecandidate = ({ candidate }) => {
     console.log('Received ICE candidate:', candidate);
     if (candidate) {
@@ -110,12 +103,12 @@ async function startAndDisplaySession() {
   await startSession(sessionInfo.session_id, localDescription);
 
   var receivers = peerConnection.getReceivers();
-  
+
   receivers.forEach((receiver) => {
     receiver.jitterBufferTarget = 500
   });
 
-   updateStatus(statusElement, 'Session started successfully');
+  updateStatus(statusElement, 'Session started successfully');
 }
 
 const taskInput = document.querySelector('#taskInput');
@@ -171,7 +164,7 @@ async function talkAgentHandler() {
 async function chooseModelToAnswer(prompt, model) {
 
   try {
-    const text = await talkToOpenAI(prompt,model)
+    const text = await talkToOpenAI(prompt, model)
 
     if (text) {
       // Send the AI's response to Heygen's streaming.task API
@@ -196,92 +189,92 @@ async function speakHandler() {
   // Check if the browser supports getUserMedia
 
   try {
-        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        audioContext = new AudioContext();
-        await audioContext.audioWorklet.addModule('audioProcessor.js'); // Load the audio worklet processor
-        source = audioContext.createMediaStreamSource(stream);
-        processor = new AudioWorkletNode(audioContext, 'audio-processor');
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioContext = new AudioContext();
+    await audioContext.audioWorklet.addModule('audioProcessor.js'); // Load the audio worklet processor
+    source = audioContext.createMediaStreamSource(stream);
+    processor = new AudioWorkletNode(audioContext, 'audio-processor');
 
-        source.connect(processor);
-        processor.connect(audioContext.destination);
+    source.connect(processor);
+    processor.connect(audioContext.destination);
 
-        processor.port.onmessage = (event) => {
-          const audioChunk = event.data;
-          // Convert float audio data to a suitable format (e.g., WAV) before sending
-          const audioBlob = floatToWav(audioChunk, audioContext.sampleRate);
-          sendAudioToServer(audioBlob);
-      };
-      
-      function floatToWav(buffer, sampleRate) {
-        const bufferLength = buffer.length;
-        const wavBuffer = new ArrayBuffer(44 + bufferLength * 2);
-        const view = new DataView(wavBuffer);
-    
-        // Write the WAV container,
-        // Check out https://ccrma.stanford.edu/courses/422/projects/WaveFormat/ for more details on this format
-        // RIFF chunk descriptor
-        writeString(view, 0, 'RIFF');
-        view.setUint32(4, 36 + bufferLength * 2, true);
-        writeString(view, 8, 'WAVE');
-        // FMT sub-chunk
-        writeString(view, 12, 'fmt ');
-        view.setUint32(16, 16, true); // PCM chunk size
-        view.setUint16(20, 1, true); // Audio format 1 is PCM
-        view.setUint16(22, 1, true); // Number of channels
-        view.setUint32(24, sampleRate, true); // Sample rate
-        view.setUint32(28, sampleRate * 2, true); // Byte rate (Sample Rate * Block Align)
-        view.setUint16(32, 2, true); // Block align (NumChannels * BitsPerSample/8)
-        view.setUint16(34, 16, true); // Bits per sample
-        // Data sub-chunk
-        writeString(view, 36, 'data');
-        view.setUint32(40, bufferLength * 2, true);
-    
-        // Write the audio data
-        let offset = 44;
-        for (let i = 0; i < bufferLength; i++, offset += 2) {
-            const sample = Math.max(-1, Math.min(1, buffer[i])); // Clamp the values between -1 and 1
-            view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
-        }
-    
-        return new Blob([view], { type: 'audio/wav' });
-    }
-    
-    function writeString(view, offset, string) {
-        for (let i = 0; i < string.length; i++) {
-            view.setUint8(offset + i, string.charCodeAt(i));
-        }
-    }
-      
-      async function sendAudioToServer(audioBlob) {
-          const formData = new FormData();
-          formData.append('audio', audioBlob);
-          const response = await fetch('./whisper', {
-              method: 'POST',
-              body: formData
-          })
-          const prompt = await response.text();
-          const text = await talkToOpenAI(prompt)
-          if (text) {
-            // Send the AI's response to Heygen's streaming.task API
-            const resp = await repeat(sessionInfo.session_id, text);
-            updateStatus(statusElement, 'LLM response sent successfully');
-          } else {
-            updateStatus(statusElement, 'Failed to get a response from AI');
-          }
-          
+    processor.port.onmessage = (event) => {
+      const audioChunk = event.data;
+      // Convert float audio data to a suitable format (e.g., WAV) before sending
+      const audioBlob = floatToWav(audioChunk, audioContext.sampleRate);
+      sendAudioToServer(audioBlob);
+    };
+
+    function floatToWav(buffer, sampleRate) {
+      const bufferLength = buffer.length;
+      const wavBuffer = new ArrayBuffer(44 + bufferLength * 2);
+      const view = new DataView(wavBuffer);
+
+      // Write the WAV container,
+      // Check out https://ccrma.stanford.edu/courses/422/projects/WaveFormat/ for more details on this format
+      // RIFF chunk descriptor
+      writeString(view, 0, 'RIFF');
+      view.setUint32(4, 36 + bufferLength * 2, true);
+      writeString(view, 8, 'WAVE');
+      // FMT sub-chunk
+      writeString(view, 12, 'fmt ');
+      view.setUint32(16, 16, true); // PCM chunk size
+      view.setUint16(20, 1, true); // Audio format 1 is PCM
+      view.setUint16(22, 1, true); // Number of channels
+      view.setUint32(24, sampleRate, true); // Sample rate
+      view.setUint32(28, sampleRate * 2, true); // Byte rate (Sample Rate * Block Align)
+      view.setUint16(32, 2, true); // Block align (NumChannels * BitsPerSample/8)
+      view.setUint16(34, 16, true); // Bits per sample
+      // Data sub-chunk
+      writeString(view, 36, 'data');
+      view.setUint32(40, bufferLength * 2, true);
+
+      // Write the audio data
+      let offset = 44;
+      for (let i = 0; i < bufferLength; i++, offset += 2) {
+        const sample = Math.max(-1, Math.min(1, buffer[i])); // Clamp the values between -1 and 1
+        view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
       }
-    } catch (err) {
-        console.error('Error accessing microphone:', err);
+
+      return new Blob([view], { type: 'audio/wav' });
     }
-} 
+
+    function writeString(view, offset, string) {
+      for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    }
+
+    async function sendAudioToServer(audioBlob) {
+      const formData = new FormData();
+      formData.append('audio', audioBlob);
+      const response = await fetch('./whisper', {
+        method: 'POST',
+        body: formData
+      })
+      const prompt = await response.text();
+      const text = await talkToOpenAI(prompt)
+      if (text) {
+        // Send the AI's response to Heygen's streaming.task API
+        const resp = await repeat(sessionInfo.session_id, text);
+        updateStatus(statusElement, 'LLM response sent successfully');
+      } else {
+        updateStatus(statusElement, 'Failed to get a response from AI');
+      }
+
+    }
+  } catch (err) {
+    console.error('Error accessing microphone:', err);
+  }
+}
 
 
 function stopRecording() {
   if (audioContext) {
-      audioContext.close(); // Close the audio context
+    audioContext.close(); // Close the audio context
   }
   if (stream) {
-      stream.getTracks().forEach(track => track.stop()); // Stop all tracks
+    stream.getTracks().forEach(track => track.stop()); // Stop all tracks
   }
   console.log("Recording stopped.");
 }
@@ -340,10 +333,10 @@ async function newChatHandler() {
       'Server Error. Please ask the staff if the service has been turned on',
     );
     throw new Error('Server error');
-  } else if (response.status === 200){
+  } else if (response.status === 200) {
     let data = await response.json()
     updateStatus(statusElement, `New chat created ${JSON.stringify(data)}`);
-   
+
   }
   return response;
 }
@@ -425,7 +418,7 @@ async function handleICE(session_id, candidate) {
 }
 // when running this in the cloud fetch needs to be as below.
 // model should be "chat" or "agent"
-async function talkToOpenAI(prompt,model) {
+async function talkToOpenAI(prompt, model) {
   const response = await fetch(`./openai/${model}`, {
     method: 'POST',
     headers: {
