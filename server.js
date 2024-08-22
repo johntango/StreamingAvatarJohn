@@ -57,6 +57,9 @@ app.get('/newChat', async (req, res) => {
   res.status(200).json(response);
 });
 
+app.get('/getKeys', async (req, res) => {
+  res.status(200).json(heygen_API)
+})
 app.post('/openai/agent', async (req, res) => {
   let prompt = req.body.prompt;
   if (focus.thread_id == "") {

@@ -1,10 +1,22 @@
 'use strict';
 
-// ENTER YOUR API KEY HERE
-
+// ENTER YOUR API KEY HERE or 
+// get keys from server
+async function getKeys() {
+  const response = await fetch(`./getKeys`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  const heygen_API = response.json()
+  return heygen_API;
+}
+const heygen_API = await getKeys();
 
 const apiKey = heygen_API.apiKey;
 const SERVER_URL = heygen_API.serverUrl;
+console.log("got keys:" + JSON.stringify(heygen_API));
 
 if (apiKey === 'YourApiKey' || SERVER_URL === '') {
   alert('Please enter your API key and server URL in the api.json file');
