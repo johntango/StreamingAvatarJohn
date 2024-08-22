@@ -60,7 +60,7 @@ app.post('/openai/agent', async (req, res) => {
   // You can create and attach VectorDB in the OpenAI Playground (attached to the Assistant)
   // Up to 10,000 files and 100 GB total data. 
   //
-  focus.assistant_id = "asst_f2IyLAfBNZCheaA8U1jqgFZk"; // John's CrewAI Documents Test
+  focus.assistant_id = "asst_LHXQlNABmYGyT4DdhEW0Tq7L"; // John's CrewAI Documents Test
   let message = await runAssistant(prompt);  // John's Assistant handling by hand 
   console.log(message);
   res.json({ text: message });

@@ -44,6 +44,7 @@ async function createNewSession() {
 
   const avatar = avatarID.value;
   const voice = voiceID.value;
+  console.log(`AvatarID: ${avatar}, VoiceID: ${voice}`);
 
   // call the new interface to get the server's offer SDP and ICE server to create a new RTCPeerConnection
   sessionInfo = await newSession('low', avatar, voice);
