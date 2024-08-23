@@ -61,7 +61,7 @@ app.get('/getKeys', async (req, res) => {
   res.status(200).json(heygen_API)
 })
 app.post('/openai/agent', async (req, res) => {
-  let prompt = req.body.messages[1].content;
+  let prompt = req.body.prompt;
   if (focus.thread_id == "") {
     await switchThread();
   }

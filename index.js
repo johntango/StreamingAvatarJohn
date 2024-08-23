@@ -174,6 +174,7 @@ async function talkAgentHandler() {
 }
 
 async function chooseModelToAnswer(prompt, model) {
+  console.log(`Go to LLM with Prompt: ${prompt}, Model: ${model}`);
 
   try {
     const text = await talkToOpenAI(prompt, model)
@@ -266,7 +267,7 @@ async function speakHandler() {
         body: formData
       })
       const prompt = await response.text();
-      const text = await talkToOpenAI(prompt)
+      const text = await talkToOpenAI(prompt, 'chat');
       if (text) {
         // Send the AI's response to Heygen's streaming.task API
         const resp = await repeat(sessionInfo.session_id, text);
