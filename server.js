@@ -61,7 +61,7 @@ app.get('/getKeys', async (req, res) => {
   res.status(200).json(heygen_API)
 })
 app.post('/openai/agent', async (req, res) => {
-  let prompt = req.body.messages;
+  let prompt = req.body.messages[1].content;
   if (focus.thread_id == "") {
     await switchThread();
   }
@@ -73,9 +73,9 @@ app.post('/openai/agent', async (req, res) => {
   // Up to 10,000 files and 100 GB total data. 
   //
   focus.assistant_id = "asst_LHXQlNABmYGyT4DdhEW0Tq7L"; // John's CrewAI Documents Test
-  let message = await runAssistant(prompt);  // John's Assistant handling by hand 
+  let message = await runAssistant(`${prompt}.  Reply in one sentence`);  // John's Assistant handling by hand 
   console.log(message);
-  res.json({ text: message });
+  res.json({ message });
 })
 
 // this creates a new thread for the assistant to run in
