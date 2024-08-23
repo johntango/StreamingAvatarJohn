@@ -1,3 +1,5 @@
+# Keys are now all in server.js and index.js pulls the HeyGen Keys it needs from server
+
 # Testing Special Agent with VectorDB knowledge base. Using OpenAI Assistant
 
 ### Generate Assistant in OpenAI Playground and Also Drag and Drop files to create VectorDB (10,000 files allowed)
