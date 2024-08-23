@@ -166,6 +166,6 @@ app.post('/whisper', upload.single('audio'), async (req, res) => {
 });
 
 
-app.listen(3000, function () {
-  console.log('App is listening on port 3000!');
+app.listen(3003, function () {
+  console.log('App is listening on port 3003!');
 });

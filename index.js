@@ -125,7 +125,7 @@ async function startAndDisplaySession() {
 
 const taskInput = document.querySelector('#taskInput');
 
-// When clicking the "Send Task" button, get the content from the input field, then send the tas
+// When clicking the "Send Task" button, get the content from the input field, then send the task
 async function repeatHandler() {
   if (!sessionInfo) {
     updateStatus(statusElement, 'Please create a connection first');
@@ -214,6 +214,7 @@ async function speakHandler() {
       const audioChunk = event.data;
       // Convert float audio data to a suitable format (e.g., WAV) before sending
       const audioBlob = floatToWav(audioChunk, audioContext.sampleRate);
+      console.log('Audio chunk:', audioBlob);
       sendAudioToServer(audioBlob);
     };
 
@@ -326,8 +327,8 @@ document.querySelector('#repeatBtn').addEventListener('click', repeatHandler);
 document.querySelector('#closeBtn').addEventListener('click', closeConnectionHandler);
 document.querySelector('#talkChatBtn').addEventListener('click', talkChatHandler);
 document.querySelector('#talkAgentBtn').addEventListener('click', talkAgentHandler);
-//document.querySelector('#speakBtn').addEventListener('click', speakHandler);
-//document.querySelector('#stopBtn').addEventListener('click', stopRecording);
+document.querySelector('#speakBtn').addEventListener('click', speakHandler);
+document.querySelector('#stopBtn').addEventListener('click', stopRecording);
 document.querySelector('#newChatBtn').addEventListener('click', newChatHandler);
 
 // new chat handler
