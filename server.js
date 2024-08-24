@@ -75,7 +75,7 @@ app.post('/openai/agent', async (req, res) => {
   focus.assistant_id = "asst_LHXQlNABmYGyT4DdhEW0Tq7L"; // John's CrewAI Documents Test
   let message = await runAssistant(`${prompt}.  Reply in one sentence`);  // John's Assistant handling by hand 
   console.log(message);
-  res.json({ message });
+  res.json({ text: message });
 })
 
 // this creates a new thread for the assistant to run in

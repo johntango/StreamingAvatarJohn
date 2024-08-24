@@ -127,6 +127,7 @@ const taskInput = document.querySelector('#taskInput');
 
 // When clicking the "Send Task" button, get the content from the input field, then send the task
 async function repeatHandler() {
+  console.log('Repeat button clicked');
   if (!sessionInfo) {
     updateStatus(statusElement, 'Please create a connection first');
 
@@ -174,7 +175,7 @@ async function talkAgentHandler() {
 }
 
 async function chooseModelToAnswer(prompt, model) {
-  console.log(`Go to LLM with Prompt: ${prompt}, Model: ${model}`);
+  console.log(`Go to Model: ${model} LLM with Prompt: ${prompt}`, );
 
   try {
     const text = await talkToOpenAI(prompt, model)
