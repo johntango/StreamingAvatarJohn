@@ -175,15 +175,16 @@ async function talkAgentHandler() {
 }
 
 async function chooseModelToAnswer(prompt, model) {
-  console.log(`Go to Model: ${model} LLM with Prompt: ${prompt}`, );
+  
 
   try {
+    updateStatus(statusElement,`Go to Model: ${model} LLM with Prompt: ${prompt}`, );
     const text = await talkToOpenAI(prompt, model)
 
     if (text) {
       // Send the AI's response to Heygen's streaming.task API
       const resp = await repeat(sessionInfo.session_id, text);
-      updateStatus(statusElement, 'LLM response sent successfully');
+      updateStatus(statusElement, `${model} to Avatar: ${text}`);
     } else {
       updateStatus(statusElement, 'Failed to get a response from AI');
     }
@@ -272,7 +273,7 @@ async function speakHandler() {
       if (text) {
         // Send the AI's response to Heygen's streaming.task API
         const resp = await repeat(sessionInfo.session_id, text);
-        updateStatus(statusElement, 'LLM response sent successfully');
+        updateStatus(statusElement, `Speech sent to Avatar: ${text}`);
       } else {
         updateStatus(statusElement, 'Failed to get a response from AI');
       }
@@ -335,6 +336,7 @@ document.querySelector('#newChatBtn').addEventListener('click', newChatHandler);
 
 // new chat handler
 async function newChatHandler() {
+  // get a new thread up in Server
   const response = await fetch(`./newChat`, {
     method: 'GET',
     headers: {
@@ -350,10 +352,9 @@ async function newChatHandler() {
     throw new Error('Server error');
   } else if (response.status === 200) {
     let data = await response.json()
-    updateStatus(statusElement, `New chat created ${JSON.stringify(data)}`);
-
+    updateStatus(statusElement, `New thread_id in server created ${data}`);
   }
-  return response;
+  // no need to return anything. 
 }
 // new session
 async function newSession(quality, avatar_name, voice_id) {
@@ -441,14 +442,12 @@ async function talkToOpenAI(prompt, model) {
     },
     body: JSON.stringify({ prompt }),
   });
-  if (response.status === 500) {
+  if (response.status !== 200) {
     console.error('Server error');
-    updateStatus(
-      statusElement,
-      'Server Error. Please make sure to set the openai api key',
-    );
+    updateStatus(statusElement,'Server Error. Please make sure to set the openai api key');
     throw new Error('Server error');
   } else {
+    // we have the LLM response
     const data = await response.json();
     return data.text;
   }

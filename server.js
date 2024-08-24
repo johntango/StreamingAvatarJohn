@@ -54,6 +54,8 @@ app.post('/openai/chat', async (req, res) => {
 
 app.get('/newChat', async (req, res) => {
   let response = await switchThread();
+  focus.thread_id = response.text;
+  console.log(`New Chat Thread ID: ${focus.thread_id}`);
   res.status(200).json(response);
 });
 
@@ -166,6 +168,6 @@ app.post('/whisper', upload.single('audio'), async (req, res) => {
 });
 
 
-app.listen(3003, function () {
-  console.log('App is listening on port 3003!');
+app.listen(3000, function () {
+  console.log('App is listening on port 3000!');
 });
