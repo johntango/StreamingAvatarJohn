@@ -6,7 +6,7 @@
 
 body {
   font-family: Arial, sans-serif;
-  background-color: #f5f5f5;
+  background-color: #034629;
   padding: 24px;
 }
 
@@ -41,7 +41,8 @@ button {
   border-radius: 8px;
   height: 40px;
 
-  background-color: #4caf50; /* Green */
+  background-color: #4caf50;
+  /* Green */
   border: none;
 
   color: #fff;
@@ -91,17 +92,19 @@ input {
 
   justify-content: center;
 }
+
 .switchRow {
   flex-direction: column;
 }
-.switchRow > label {
+
+.switchRow>label {
   width: 100%;
 
   display: flex;
   justify-content: center;
 }
 
-.switchRow > label input {
+.switchRow>label input {
   flex: 1;
   max-width: 500px;
 }
@@ -170,15 +173,15 @@ input {
   transition: 0.4s;
 }
 
-input:checked + .slider {
+input:checked+.slider {
   background-color: #2196f3;
 }
 
-input:focus + .slider {
+input:focus+.slider {
   box-shadow: 0 0 1px #2196f3;
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
   -webkit-transform: translateX(26px);
   -ms-transform: translateX(26px);
   transform: translateX(26px);
@@ -192,6 +195,7 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 }
+
 /*---------- Switch END ----------*/
 
 .videoSectionWrap .hide {
@@ -205,6 +209,7 @@ input:checked + .slider:before {
 .hide {
   display: none;
 }
+
 .show {
   display: flex;
 }

@@ -21,7 +21,7 @@ console.log("got keys:" + JSON.stringify(heygen_API));
 if (apiKey === 'YourApiKey' || SERVER_URL === '') {
   alert('Please enter your API key and server URL in the api.json file');
 }
-
+let callLLM_model = "chat"
 let sessionInfo = null;
 let peerConnection = null;
 
@@ -156,43 +156,18 @@ async function talkChatHandler() {
     alert('Please enter a prompt for the LLM');
     return;
   }
-  updateStatus(statusElement, 'Talking to Chat LLM... please wait');
-  await chooseModelToAnswer(prompt, 'chat')
-}
-// this is fired by button click
-async function talkAgentHandler() {
-  if (!sessionInfo) {
-    updateStatus(statusElement, 'Please create a connection first');
-    return;
-  }
-  const prompt = taskInput.value; // Using the same input for simplicity
-  if (prompt.trim() === '') {
-    alert('Please enter a prompt for the LLM');
-    return;
-  }
-  updateStatus(statusElement, 'Talking to Agent LLM... please wait');
-  await chooseModelToAnswer(prompt, 'agent')
-}
-
-async function chooseModelToAnswer(prompt, model) {
-  
-
-  try {
-    updateStatus(statusElement,`Go to Model: ${model} LLM with Prompt: ${prompt}`, );
-    const text = await talkToOpenAI(prompt, model)
-
-    if (text) {
-      // Send the AI's response to Heygen's streaming.task API
-      const resp = await repeat(sessionInfo.session_id, text);
-      updateStatus(statusElement, `${model} to Avatar: ${text}`);
-    } else {
-      updateStatus(statusElement, 'Failed to get a response from AI');
-    }
-  } catch (error) {
-    console.error('Error talking to AI:', error);
-    updateStatus(statusElement, 'Error talking to AI');
+  updateStatus(statusElement, `Talking to ${callLLM_model} LLM... please wait`);
+  const text = await talkToOpenAI(prompt, callLLM_model);
+  if (text) {
+    // Send the AI's response to Heygen's streaming.task API
+    const resp = await repeat(sessionInfo.session_id, text);
+    updateStatus(statusElement, `Speech sent to Avatar: ${text}`);
+  } else {
+    updateStatus(statusElement, 'Failed to get a response from AI');
   }
 }
+
+
 // fix the deprecated functions 
 let audioContext;
 let source;
@@ -269,7 +244,7 @@ async function speakHandler() {
         body: formData
       })
       const prompt = await response.text();
-      const text = await talkToOpenAI(prompt, 'chat');
+      const text = await talkToOpenAI(prompt, callLLM_model);
       if (text) {
         // Send the AI's response to Heygen's streaming.task API
         const resp = await repeat(sessionInfo.session_id, text);
@@ -329,10 +304,10 @@ document.querySelector('#startBtn').addEventListener('click', startAndDisplaySes
 document.querySelector('#repeatBtn').addEventListener('click', repeatHandler);
 document.querySelector('#closeBtn').addEventListener('click', closeConnectionHandler);
 document.querySelector('#talkChatBtn').addEventListener('click', talkChatHandler);
-document.querySelector('#talkAgentBtn').addEventListener('click', talkAgentHandler);
 document.querySelector('#speakBtn').addEventListener('click', speakHandler);
 document.querySelector('#stopBtn').addEventListener('click', stopRecording);
 document.querySelector('#newChatBtn').addEventListener('click', newChatHandler);
+
 
 // new chat handler
 async function newChatHandler() {
@@ -442,13 +417,15 @@ async function talkToOpenAI(prompt, model) {
     },
     body: JSON.stringify({ prompt }),
   });
-  if (response.status !== 200) {
+  if (response.status == 500) {
     console.error('Server error');
-    updateStatus(statusElement,'Server Error. Please make sure to set the openai api key');
+    updateStatus(statusElement, 'Server Error. Please make sure to set the openai api key');
     throw new Error('Server error');
   } else {
     // we have the LLM response
     const data = await response.json();
+    console.log("type of data from LLM" + typeof (data));
+    console.log("actual data: " + data.text);
     return data.text;
   }
 }
@@ -495,7 +472,29 @@ async function stopSession(session_id) {
     return data.data;
   }
 }
+const switchAgent = document.querySelector('#switchAgent');
+switchAgent.addEventListener('click', () => {
+  const isChecked = switchAgent.checked; // status after click
 
+  if (isChecked && !sessionInfo) {
+    updateStatus(statusElement, 'Please create a connection first');
+    switchAgent.checked = false;
+    return;
+  }
+
+  if (isChecked && !mediaCanPlay) {
+    updateStatus(statusElement, 'Please wait for the video to load');
+    switchAgent.checked = false;
+    return;
+  }
+
+  if (isChecked) {
+    // call agent
+    callLLM_model = "agent";
+  } else {
+    callLLM_model = "chat";
+  }
+});
 const removeBGCheckbox = document.querySelector('#removeBGCheckbox');
 removeBGCheckbox.addEventListener('click', () => {
   const isChecked = removeBGCheckbox.checked; // status after click
