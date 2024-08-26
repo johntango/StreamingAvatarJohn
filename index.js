@@ -13,6 +13,7 @@ async function getKeys() {
   return heygen_API;
 }
 const heygen_API = await getKeys();
+let assistant_id;
 
 const apiKey = heygen_API.apiKey;
 const SERVER_URL = heygen_API.serverUrl;
@@ -49,7 +50,9 @@ async function createNewSession() {
 
   const avatar = avatarID.value;
   const voice = voiceID.value;
-  console.log(`AvatarID: ${avatar}, VoiceID: ${voice}`);
+  assistant_id = agentID.value;
+
+  console.log(`AvatarID: ${avatar}, VoiceID: ${voice}, AgentID I ${assistant_id}`);
 
   // call the new interface to get the server's offer SDP and ICE server to create a new RTCPeerConnection
   sessionInfo = await newSession('low', avatar, voice);
@@ -151,13 +154,14 @@ async function talkChatHandler() {
     updateStatus(statusElement, 'Please create a connection first');
     return;
   }
+
   const prompt = taskInput.value; // Using the same input for simplicity
   if (prompt.trim() === '') {
     alert('Please enter a prompt for the LLM');
     return;
   }
   updateStatus(statusElement, `Talking to ${callLLM_model} LLM... please wait`);
-  const text = await talkToOpenAI(prompt, callLLM_model);
+  const text = await talkToOpenAI(prompt, callLLM_model, assistant_id);
   if (text) {
     // Send the AI's response to Heygen's streaming.task API
     const resp = await repeat(sessionInfo.session_id, text);
@@ -173,9 +177,10 @@ let audioContext;
 let source;
 let processor;
 let stream;
-// This is presently uses call to OpenAI WHisper API and is very slow.
+// This is presently uses call to OpenAI Whisper API 
 async function speakHandler() {
   console.log('Speak button clicked');
+  updateStatus(statusElement, `Speech Recording On:`);
   // Check if the browser supports getUserMedia
 
   try {
@@ -193,6 +198,7 @@ async function speakHandler() {
       // Convert float audio data to a suitable format (e.g., WAV) before sending
       const audioBlob = floatToWav(audioChunk, audioContext.sampleRate);
       console.log('Audio chunk:', audioBlob);
+      updateStatus(statusElement, `Audio Chunk Sent to Server:`);
       sendAudioToServer(audioBlob);
     };
 
@@ -235,7 +241,7 @@ async function speakHandler() {
         view.setUint8(offset + i, string.charCodeAt(i));
       }
     }
-
+    // Send the audio to Web Server via route 
     async function sendAudioToServer(audioBlob) {
       const formData = new FormData();
       formData.append('audio', audioBlob);
@@ -244,7 +250,9 @@ async function speakHandler() {
         body: formData
       })
       const prompt = await response.text();
-      const text = await talkToOpenAI(prompt, callLLM_model);
+
+      // send the prompt text to OpenAI LLM 
+      const text = await talkToOpenAI(prompt, callLLM_model, assistant_id);
       if (text) {
         // Send the AI's response to Heygen's streaming.task API
         const resp = await repeat(sessionInfo.session_id, text);
@@ -267,6 +275,7 @@ function stopRecording() {
   if (stream) {
     stream.getTracks().forEach(track => track.stop()); // Stop all tracks
   }
+  updateStatus(statusElement, `Audio Recording Stopped:`);
   console.log("Recording stopped.");
 }
 
@@ -309,7 +318,7 @@ document.querySelector('#stopBtn').addEventListener('click', stopRecording);
 document.querySelector('#newChatBtn').addEventListener('click', newChatHandler);
 
 
-// new chat handler
+// new chat handler - gets a new thread/context window - only needed with OpenAI Assistant
 async function newChatHandler() {
   // get a new thread up in Server
   const response = await fetch(`./newChat`, {
@@ -409,13 +418,13 @@ async function handleICE(session_id, candidate) {
 }
 // when running this in the cloud fetch needs to be as below.
 // model should be "chat" or "agent"
-async function talkToOpenAI(prompt, model) {
+async function talkToOpenAI(prompt, model, assistant_id) {
   const response = await fetch(`./openai/${model}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ prompt }),
+    body: JSON.stringify({ prompt, assistant_id }),
   });
   if (response.status == 500) {
     console.error('Server error');
@@ -476,23 +485,23 @@ const switchAgent = document.querySelector('#switchAgent');
 switchAgent.addEventListener('click', () => {
   const isChecked = switchAgent.checked; // status after click
 
-  if (isChecked && !sessionInfo) {
-    updateStatus(statusElement, 'Please create a connection first');
-    switchAgent.checked = false;
-    return;
-  }
+  // check that agnentID length > 10 chars. It should be an OpenAI assistant_id starting "asst"
+  // we pass it up to server.js when we call OpenAI 
+  // get first four chars of agentID 
+  assistant_id = agentID.value
 
-  if (isChecked && !mediaCanPlay) {
-    updateStatus(statusElement, 'Please wait for the video to load');
-    switchAgent.checked = false;
-    return;
-  }
 
   if (isChecked) {
+    if (assistant_id.slice(0, 4) !== "asst") {
+      updateStatus(statusElement, `Please enter an GPT assistant_id`)
+      return;
+    }
     // call agent
     callLLM_model = "agent";
+    updateStatus(statusElement, `Using OpenAI assistant_id: ${assistant_id}`);
   } else {
     callLLM_model = "chat";
+    updateStatus(statusElement, `Using OpenAI Chat`);
   }
 });
 const removeBGCheckbox = document.querySelector('#removeBGCheckbox');

@@ -64,6 +64,7 @@ app.get('/getKeys', async (req, res) => {
 })
 app.post('/openai/agent', async (req, res) => {
   let prompt = req.body.prompt;
+  let assistant_id = req.body.assistant_id
   if (focus.thread_id == "") {
     await switchThread();
   }
@@ -74,7 +75,7 @@ app.post('/openai/agent', async (req, res) => {
   // You can create and attach VectorDB in the OpenAI Playground (attached to the Assistant)
   // Up to 10,000 files and 100 GB total data. 
   //
-  focus.assistant_id = "asst_LHXQlNABmYGyT4DdhEW0Tq7L"; // John's CrewAI Documents Test
+  focus.assistant_id = assistant_id; // John's CrewAI Documents Test
   let message = await runAssistant(`${prompt}.  Reply in one sentence`);  // John's Assistant handling by hand 
   console.log(message);
   res.json({ text: message });
@@ -109,7 +110,7 @@ async function modify_thread_with_vector_store(thread_id, vector_store_id) {
   return response;
 }
 
-//
+// OPENAI ASSISTANT - puts prompt onto thread and runs it
 // this puts a message onto a thread and then runs the assistant 
 async function runAssistant(prompt) {
   try {
@@ -140,7 +141,7 @@ async function runAssistant(prompt) {
 }
 // write ./whisper post 
 const upload = multer({ storage: multer.memoryStorage() });
-// Whisper API endpoint to transcribe audio to text - uses OpenAI's Whisper model. Too slow at present!!
+// Whisper API endpoint to transcribe audio to text - uses OpenAI's Whisper model. 
 app.post('/whisper', upload.single('audio'), async (req, res) => {
   if (!req.file) {
     return res.status(400).send('No file uploaded.');
