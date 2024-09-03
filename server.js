@@ -7,6 +7,7 @@ const FormData = require('form-data');
 const fs = require('fs');
 const { Readable } = require('stream');
 const { toFile } = require("openai/uploads");
+const { on } = require('events');
 
 app.use(express.json());
 
@@ -15,7 +16,7 @@ let focus = { assistant_id: "", assistant_name: "", file_id: "", thread_id: "", 
 
 let HEYGEN_API_KEY = process.env.HEYGEN_API_KEY;
 
-const heygen_API = {
+let heygen_API = {
   apiKey: HEYGEN_API_KEY,
   serverUrl: 'https://api.heygen.com',
 };
@@ -60,8 +61,41 @@ app.get('/newChat', async (req, res) => {
 });
 
 app.get('/getKeys', async (req, res) => {
+  // use API token to get one time streaming token
+  //let onetimeToken = await getOnetimeToken(heygen_API.apiKey)
+  //heygen_API.apiKey = onetimeToken;
+
   res.status(200).json(heygen_API)
 })
+
+async function getOnetimeToken(HEYGEN_API_KEY) {
+  try {
+    if (!HEYGEN_API_KEY) {
+      throw new Error("API key is missing");
+    }
+
+    const res = await fetch(
+      "https://api.heygen.com/v1/streaming.create_token",
+      {
+        method: "POST",
+        headers: {
+          "x-api-key": HEYGEN_API_KEY,
+        },
+      }
+    );
+    const data = await res.json();
+    console.log(`OneTime Token: ${JSON.stringify(data)}`);
+    let token = data.data.token;
+
+    return token;
+  } catch (error) {
+    console.error("Error retrieving access token:", error);
+
+    return new Response("Failed to retrieve access token", {
+      status: 500,
+    });
+  }
+}
 app.post('/openai/agent', async (req, res) => {
   let prompt = req.body.prompt;
   let assistant_id = req.body.assistant_id
