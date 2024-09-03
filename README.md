@@ -1,4 +1,7 @@
 # Keys are now all in server.js and index.js pulls the HeyGen Keys it needs from server
+## We need to create a onetime token and only use that on the server. There is an API to do this.
+## However starting up a session in the Streaming API is handled differently to here. Here the setup is 
+## low level calls. In NextJS version they use Streaming API but its a bit opaque as to its use.
 
 # Special Agent with VectorDB knowledge base. Using OpenAI Assistant. Agent 
 

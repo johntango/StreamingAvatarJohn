@@ -16,6 +16,18 @@ async function getKeys() {
 }
 const heygen_API = await getKeys();
 
+async function getKeys2() {
+  const response = await fetch(`./getKeys2`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  const avatar = response.json()
+
+  return avatar;
+}
+
 let assistant_id;
 
 const apiKey = heygen_API.apiKey;
@@ -51,15 +63,31 @@ function onMessage(event) {
 async function createNewSession() {
   updateStatus(statusElement, 'Creating new session... please wait');
 
-  const avatar = avatarID.value;
-  const voice = voiceID.value;
+  const avatar_id = avatarID.value;
+  const voice_id = voiceID.value;
   assistant_id = agentID.value;
 
-  console.log(`AvatarID: ${avatar}, VoiceID: ${voice}, AgentID I ${assistant_id}`);
+  console.log(`AvatarID: ${avatar_id}, VoiceID: ${voice_id}, AgentID I ${assistant_id}`);
 
   // call the new interface to get the server's offer SDP and ICE server to create a new RTCPeerConnection
-  
-  sessionInfo = await newSession('low', avatar, voice);
+  // call the new interface to get the server's offer SDP and ICE server to create a new RTCPeerConnection
+
+  /* not working
+  let streamingAvatar = await getKeys2();
+  console.log(`AVATAR: ${JSON.stringify(streamingAvatar)}`)
+
+  sessionInfo = await streamingAvatar.createStartAvatar(
+    {
+      newSessionRequest:
+      {
+        quality: "low",
+        avatarName: avatar_id,
+        voice: { voiceId: voice_id }
+      }
+    });
+    */
+  console.log(`sessionInfo: ${JSON.stringify(sessionInfo)}`)
+  sessionInfo = await newSession('low', avatar_id, voice_id);
   const { sdp: serverSdp, ice_servers2: iceServers } = sessionInfo;
 
   // Create a new RTCPeerConnection
