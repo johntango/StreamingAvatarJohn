@@ -1,5 +1,7 @@
 'use strict';
 
+
+
 // ENTER YOUR API KEY HERE or 
 // get keys from server
 async function getKeys() {
@@ -13,6 +15,7 @@ async function getKeys() {
   return heygen_API;
 }
 const heygen_API = await getKeys();
+
 let assistant_id;
 
 const apiKey = heygen_API.apiKey;
@@ -55,6 +58,7 @@ async function createNewSession() {
   console.log(`AvatarID: ${avatar}, VoiceID: ${voice}, AgentID I ${assistant_id}`);
 
   // call the new interface to get the server's offer SDP and ICE server to create a new RTCPeerConnection
+  
   sessionInfo = await newSession('low', avatar, voice);
   const { sdp: serverSdp, ice_servers2: iceServers } = sessionInfo;
 

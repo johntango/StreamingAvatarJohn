@@ -8,6 +8,7 @@ const fs = require('fs');
 const { Readable } = require('stream');
 const { toFile } = require("openai/uploads");
 const { on } = require('events');
+const { Configuration, NewSessionData, StreamingAvatarApi } = require("@heygen/streaming-avatar");
 
 app.use(express.json());
 
@@ -62,8 +63,12 @@ app.get('/newChat', async (req, res) => {
 
 app.get('/getKeys', async (req, res) => {
   // use API token to get one time streaming token
-  //let onetimeToken = await getOnetimeToken(heygen_API.apiKey)
-  //heygen_API.apiKey = onetimeToken;
+  /*let onetimeToken = await getOnetimeToken(heygen_API.apiKey)
+    let avatar  = new StreamingAvatarApi(
+    new Configuration({ accessToken: onetimeToken })
+  );
+  heygen_API.apiKey = onetimeToken;
+  */
 
   res.status(200).json(heygen_API)
 })
