@@ -30,7 +30,7 @@ console.log(`OPENAI_API_KEY  ${process.env.OPENAI_API_KEY} `);
 
 
 // This is for the OpenAI chat endpoint. 
-const systemSetup = "you are a demo streaming avatar from HeyGen, an industry-leading AI generation product that specialize in AI avatars and videos.\nYou are here to showcase how a HeyGen streaming avatar looks and talks.\nPlease note you are not equipped with any specific expertise or industry knowledge yet, which is to be provided when deployed to a real customer's use case.\nAudience will try to have a conversation with you, please try answer the questions or respond their comments naturally, and concisely. - please try your best to response with short answers, limit to one sentence per response, and only answer the last question."
+const systemSetup = "you are a demo streaming avatar from HeyGen, an industry-leading AI generation product that specialize in AI avatars and videos.\nYou are here to showcase how a HeyGen streaming avatar looks and talks.\nPlease note you are not equipped with any specific expertise or industry knowledge yet, which is to be provided when deployed to a real customer's use case.\nAudience will try to have a conversation with you, please try answer the questions or respond their comments naturally, and concisely. - please try your best to response with short answers, limit to two sentences per response, and only answer the last question."
 
 app.use(express.static(path.join(__dirname, '.')));
 
@@ -96,12 +96,13 @@ async function getAvatar(HEYGEN_API_KEY) {
         },
       }
     );
-    const data = await res.json();
-    console.log(`OneTime Token: ${JSON.stringify(data)}`);
-    let token = data.data.token;
+    const response = await res.json();
+    console.log(`OneTime Token: ${JSON.stringify(response.data.token)}`);
+    let oneTimeToken = response.data.token;
     let streamingAvatar = new StreamingAvatarApi(
-      new Configuration({ accessToken: token })
+      new Configuration({ accessToken: oneTimeToken })
     )
+    console.log(`Server side Streaming Avatar: ${JSON.stringify(streamingAvatar)}`);
     return streamingAvatar;
 
   } catch (error) {

@@ -1,7 +1,5 @@
 'use strict';
 
-
-
 // ENTER YOUR API KEY HERE or 
 // get keys from server
 async function getKeys() {
@@ -14,7 +12,7 @@ async function getKeys() {
   const heygen_API = response.json()
   return heygen_API;
 }
-const heygen_API = await getKeys();
+
 
 async function getKeys2() {
   const response = await fetch(`./getKeys2`, {
@@ -23,20 +21,41 @@ async function getKeys2() {
       'Content-Type': 'application/json',
     },
   });
-  const avatar = response.json()
+  let oneTimeToken = response.json()
+
+  return oneTimeToken;
+}
+async function newJSession(oneTimeToken, quality, avatar_name, voice_id) {
+
+
+  let url = "https://api.heygen.com/v1/streaming.new"
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Api-Key': oneTimeToken,
+    },
+    body: JSON.stringify({
+      quality: "low",
+      voice: {
+        rate: 1
+      },
+      video_encoding: "VP8"
+    })
+  });
+  const avatar = await response.json()
 
   return avatar;
 }
 
+
 let assistant_id;
 
-const apiKey = heygen_API.apiKey;
-const SERVER_URL = heygen_API.serverUrl;
-console.log("got keys:" + JSON.stringify(heygen_API));
-
+/*
 if (apiKey === 'YourApiKey' || SERVER_URL === '') {
   alert('Please enter your API key and server URL in the api.json file');
 }
+  */
 let callLLM_model = "chat"
 let sessionInfo = null;
 let peerConnection = null;
@@ -58,7 +77,11 @@ function onMessage(event) {
   const message = event.data;
   console.log('Received message:', message);
 }
-
+let heygen_API;
+let  SERVER_URL;;
+let oneTimeToken;
+let streamingAvatar;
+console.log("got keys:" + JSON.stringify(heygen_API));
 // Create a new WebRTC session when clicking the "New" button
 async function createNewSession() {
   updateStatus(statusElement, 'Creating new session... please wait');
@@ -69,13 +92,18 @@ async function createNewSession() {
 
   console.log(`AvatarID: ${avatar_id}, VoiceID: ${voice_id}, AgentID I ${assistant_id}`);
 
+  // get the new session
+    heygen_API  = await getKeys();
+    SERVER_URL = heygen_API.server_url;
+    console.log(`HEYGEN_API: ${JSON.stringify(heygen_API)}`)
+    streamingAvatar = await getKeys2();
+
+    console.log(`Index streamingAvatar ${JSON.stringify(streamingAvatar)}`)
+   
   // call the new interface to get the server's offer SDP and ICE server to create a new RTCPeerConnection
   // call the new interface to get the server's offer SDP and ICE server to create a new RTCPeerConnection
-
-  /* not working
-  let streamingAvatar = await getKeys2();
-  console.log(`AVATAR: ${JSON.stringify(streamingAvatar)}`)
-
+ 
+/*
   sessionInfo = await streamingAvatar.createStartAvatar(
     {
       newSessionRequest:
@@ -85,8 +113,10 @@ async function createNewSession() {
         voice: { voiceId: voice_id }
       }
     });
-    */
+    
   console.log(`sessionInfo: ${JSON.stringify(sessionInfo)}`)
+  */
+
   sessionInfo = await newSession('low', avatar_id, voice_id);
   const { sdp: serverSdp, ice_servers2: iceServers } = sessionInfo;
 
@@ -374,11 +404,12 @@ async function newChatHandler() {
 }
 // new session
 async function newSession(quality, avatar_name, voice_id) {
+
   const response = await fetch(`${SERVER_URL}/v1/streaming.new`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-Api-Key': apiKey,
+      'X-Api-Key': apiKey 
     },
     body: JSON.stringify({
       quality,
@@ -388,6 +419,7 @@ async function newSession(quality, avatar_name, voice_id) {
       },
     }),
   });
+  
   if (response.status === 500) {
     console.error('Server error');
     updateStatus(
