@@ -23,9 +23,9 @@ async function getKeys2() {
       'Content-Type': 'application/json',
     },
   });
-  const avatar = response.json()
+  const oneTimeKey = response.json()
 
-  return avatar;
+  return oneTimeKey;
 }
 
 let assistant_id;

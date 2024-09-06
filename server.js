@@ -76,7 +76,7 @@ app.get('/getKeys', async (req, res) => {
 app.get('/getKeys2', async (req, res) => {
   // use API token to get one time streaming token - This is not yet working
 
-  let avatar = await getAvatar(heygen_API.apiKey)
+  let oneTimeKey = await getAvatar(heygen_API.apiKey)
   // uses onetime token to create a streaming Avatar
   console.log(`Returning an avatar: ${JSON.stringify(avatar)}`)
   res.status(200).json(avatar)
@@ -96,13 +96,11 @@ async function getAvatar(HEYGEN_API_KEY) {
         },
       }
     );
-    const data = await res.json();
+    const response = await res.json();
     console.log(`OneTime Token: ${JSON.stringify(data)}`);
-    let token = data.data.token;
-    let streamingAvatar = new StreamingAvatarApi(
-      new Configuration({ accessToken: token })
-    )
-    return streamingAvatar;
+    let oneTimeKey = response.data.token;
+   
+    return oneTimeKey;
 
   } catch (error) {
     console.error("Error retrieving access token:", error);
